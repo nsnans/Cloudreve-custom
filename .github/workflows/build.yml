@@ -48,6 +48,7 @@ jobs:
 
       - name: Setup Go
         uses: actions/setup-go@v5
+        working-directory: cloudreve
         with:
           go-version: '1.27.1'
 
@@ -71,43 +72,15 @@ jobs:
                 - -s -w
 
               goos:
-                - linux
                 - windows
-                - darwin
-                - freebsd
 
               goarch:
                 - amd64
-                - arm
                 - arm64
-                - loong64
-
-              goarm:
-                - 5
-                - 6
-                - 7
-
-              ignore:
-                - goos: windows
-                  goarm: 5
-                - goos: windows
-                  goarm: 6
-                - goos: windows
-                  goarm: 7
-                - goos: windows
-                  goarch: loong64
-                - goos: freebsd
-                  goarch: loong64
-                - goos: freebsd
-                  goarch: arm
 
           archives:
             - formats:
-                - tar.gz
-              format_overrides:
-                - goos: windows
-                  formats:
-                    - zip
+                - zip
           EOF
 
       - name: Build Cloudreve
