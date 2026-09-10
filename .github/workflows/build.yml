@@ -28,7 +28,7 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Package assets
-        run: zip -r assets.zip dist
+        run: zip -r assets.zip build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
