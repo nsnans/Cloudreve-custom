@@ -37,10 +37,87 @@ jobs:
           zip -r ../assets.zip assets
           cd ..
           rm -rf .tmp
+          
+      - name: Clone Cloudreve 4.18.0
+        run: |
+          git clone --branch 4.18.0 --depth 1 https://github.com/cloudreve/cloudreve.git
 
-      - name: Upload artifact
+      - name: Move assets
+        run: |
+          mv assets.zip cloudreve/application/statics/
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+
+      - name: Install GoReleaser
+        run: |
+          go install github.com/goreleaser/goreleaser/v2@latest
+
+      - name: Configure GoReleaser
+        working-directory: cloudreve
+        run: |
+          cat > .goreleaser.yaml <<'EOF'
+          version: 2
+
+          builds:
+            - env:
+                - CGO_ENABLED=0
+
+              binary: cloudreve
+
+              ldflags:
+                - -s -w
+
+              goos:
+                - linux
+                - windows
+                - darwin
+                - freebsd
+
+              goarch:
+                - amd64
+                - arm
+                - arm64
+                - loong64
+
+              goarm:
+                - 5
+                - 6
+                - 7
+
+              ignore:
+                - goos: windows
+                  goarm: 5
+                - goos: windows
+                  goarm: 6
+                - goos: windows
+                  goarm: 7
+                - goos: windows
+                  goarch: loong64
+                - goos: freebsd
+                  goarch: loong64
+                - goos: freebsd
+                  goarch: arm
+
+          archives:
+            - formats:
+                - tar.gz
+              format_overrides:
+                - goos: windows
+                  formats:
+                    - zip
+          EOF
+
+      - name: Build Cloudreve
+        working-directory: cloudreve
+        run: |
+          goreleaser build --clean --snapshot
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: assets
-          path: assets.zip
+          name: cloudreve
+          path: cloudreve/dist/
           retention-days: 1
